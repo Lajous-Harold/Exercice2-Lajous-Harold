@@ -1,0 +1,26 @@
+{
+  "name": "todolist-express-mvc",
+  "version": "1.0.0",
+  "description": "Exercice2 - API ToDoList en Express (MVC, stockage en mémoire)",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "keywords": [
+    "express",
+    "todolist",
+    "mvc",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
