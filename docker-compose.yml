@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    container_name: todolist-api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/todolist
+      USE_MEMORY: "false"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: todolist-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongo_data:
