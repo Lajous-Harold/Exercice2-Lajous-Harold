@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "Exercice2 - API ToDoList en Express (MVC, stockage en mémoire)",
   "main": "src/app.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "start": "node src/app.js"
+    "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+    "start": "cross-env NODE_ENV=production node src/app.js",
+    "lint": "eslint .",
+    "format": "prettier -w .",
+    "test": "cross-env NODE_ENV=test node --test"
   },
   "keywords": [
     "express",
@@ -17,10 +21,18 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^4.19.2",
+    "mongoose": "^8.19.1",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@eslint/js": "^9.37.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.37.0",
+    "globals": "^16.4.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
   }
 }

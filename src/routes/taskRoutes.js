@@ -1,7 +1,7 @@
-const express = require("express");
-const { listTasks, addTask, removeTask } = require("../controllers/taskController");
+import { Router } from "express";
+import { listTasks, addTask, removeTask } from "../controllers/taskController.js";
 
-const router = express.Router();
+const router = Router();
 
 // GET /api/v1/tasks  -> afficher toutes les tâches
 router.get("/", listTasks);
@@ -9,7 +9,7 @@ router.get("/", listTasks);
 // POST /api/v1/tasks -> ajouter une tâche
 router.post("/", addTask);
 
-// DELETE /api/v1/tasks/:idx -> supprimer (idx = 1-based)
-router.delete("/:idx", removeTask);
+// DELETE /api/v1/tasks/:id -> supprimer (idx = 1-based)
+router.delete("/:id", removeTask);
 
-module.exports = router;
+export default router;

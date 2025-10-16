@@ -1,13 +1,16 @@
-/* Task Model 
-    A task is defined by a title and an optional description.
-*/
+/* Task Model
+ *  A task is defined by a title and an optional description.
+ *  Timestamps are automatically managed by Mongoose.
+ */
 
-class Task {
-  // Initialize a new Task with title and a description (by default, an empty string)
-  constructor(title, description = "") {
-    this.title = title;
-    this.description = description;
-  }
-}
+import mongoose from "mongoose";
 
-module.exports = Task;
+const taskSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    description: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+export const Task = mongoose.model("Task", taskSchema);
