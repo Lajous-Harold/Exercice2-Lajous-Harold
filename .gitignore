@@ -1,73 +1,24 @@
-# ---------------------------------------
-# Node / Express
-# ---------------------------------------
+# Node / dépendances
 node_modules/
-
-# Logs
-logs/
-*.log
-*.log.*
 npm-debug.log*
-yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# PID files
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# ---------------------------------------
-# Environnements (gardez un .env.example)
-# ---------------------------------------
+# Environnements (garde un .env.example)
 .env
-.env.*
-!.env.example
-!.env.sample
 
-# ---------------------------------------
-# Tests & Couverture
-# ---------------------------------------
+# Tests / couverture
 coverage/
-.nyc_output/
-lcov-report/
-.jest/
-jest.cache
 
-# ---------------------------------------
-# Build / Bundling / TypeScript
-# ---------------------------------------
+# Builds éventuels
 dist/
 build/
 out/
-*.tsbuildinfo
 
-# ---------------------------------------
-# Caches d’outils
-# ---------------------------------------
-.cache/
-.parcel-cache/
-.eslintcache
-.stylelintcache
-.turbo/
-.vercel/
-.next/
-vite.config.ts.timestamp-*
-
-# ---------------------------------------
-# Temp
-# ---------------------------------------
-tmp/
-temp/
-
-# ---------------------------------------
 # Éditeurs / OS
-# ---------------------------------------
 .DS_Store
 Thumbs.db
-.ideavim.rc
-.idea/
 .vscode/
-*.swp
-*.swo
+.idea/
+
+package-lock.json
