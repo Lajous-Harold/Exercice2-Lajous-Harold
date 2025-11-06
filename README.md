@@ -139,8 +139,6 @@ POSTGRES_DB=todolist
 
 ### Commandes Docker **simplifiées** (scripts NPM)
 
-Ajoute/valide ces scripts dans `package.json` :
-
 ```jsonc
 {
   "scripts": {
