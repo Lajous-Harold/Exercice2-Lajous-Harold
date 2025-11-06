@@ -7,7 +7,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DB_CLIENT: ${DB_CLIENT:-mongo}
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/todolist}
       POSTGRES_URL: ${POSTGRES_URL:-postgresql://app:app@postgres:5432/todolist}
       USE_MEMORY: ${USE_MEMORY:-false}
@@ -18,10 +17,8 @@ services:
     container_name: todolist-mongo
     profiles: ["mongo"]
     restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+    ports: ["27017:27017"]
+    volumes: ["mongo_data:/data/db"]
 
   postgres:
     image: postgres:16
@@ -32,10 +29,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
       POSTGRES_DB: ${POSTGRES_DB:-todolist}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+    volumes: ["pg_data:/var/lib/postgresql/data"]
 
 volumes:
   mongo_data:

@@ -22,8 +22,15 @@ if (process.env.NODE_ENV !== "test") {
   (async () => {
     try {
       await initTaskRepo();
+      const selected =
+        String(process.env.USE_MEMORY).toLowerCase() === "true"
+          ? "memory (forced)"
+          : (process.env.DB_CLIENT || "mongo") + " (default if empty)";
+      console.log(`Storage selected: ${selected}`);
       console.log(
-        `Storage ready (DB_CLIENT=${process.env.DB_CLIENT || (String(process.env.USE_MEMORY).toLowerCase() === "true" ? "memory" : "default")})`
+        `URIs → MONGO: ${process.env.MONGODB_URI || "(none)"} | POSTGRES: ${
+          process.env.POSTGRES_URL || "(none)"
+        }`
       );
       app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
     } catch (e) {

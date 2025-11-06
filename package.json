@@ -1,15 +1,17 @@
 {
   "name": "todolist-express-mvc",
   "version": "1.0.0",
-  "description": "Exercice2 - API ToDoList en Express (MVC, stockage en mémoire)",
+  "description": "Exercice2 - API ToDoList en Express (MVC) avec backends Mongo/Postgres/Mémoire sélectionnables",
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+    "dev:mongo": "cross-env DB_CLIENT=mongo NODE_ENV=development nodemon src/app.js",
+    "dev:postgres": "cross-env DB_CLIENT=postgres NODE_ENV=development nodemon src/app.js",
+    "dev:memory": "cross-env DB_CLIENT=memory NODE_ENV=development nodemon src/app.js",
     "start": "cross-env NODE_ENV=production node src/app.js",
+    "test": "cross-env NODE_ENV=test node --test",
     "lint": "eslint .",
-    "format": "prettier -w .",
-    "test": "cross-env NODE_ENV=test node --test"
+    "format": "prettier -w ."
   },
   "keywords": [
     "express",

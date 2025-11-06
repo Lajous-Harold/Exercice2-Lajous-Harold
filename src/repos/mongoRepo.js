@@ -1,5 +1,5 @@
 import { connectDB } from "../config/mongo.js";
-import { Task as MongoTask } from "../models/taskModel.js";
+import { Task as MongoTask } from "../models/mongo/taskModel.js";
 
 function toPublic(doc) {
   return {
