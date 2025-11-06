@@ -2,15 +2,17 @@
 
 API **ToDoList** en **Node.js/Express**, architecture **MVC**, ESM (`"type": "module"`).
 
-- **Stockage** :
-  - **Dev/Prod** : support MongoDB (via `MONGODB_URI`).
-  - **Test** : fallback **mémoire** automatique (`NODE_ENV=test`) — pas besoin de DB.
+- **Stockage** (sélectionnable) :
+  - `DB_CLIENT=mongo` → MongoDB (Mongoose)
+  - `DB_CLIENT=postgres` → PostgreSQL (pg)
+  - `DB_CLIENT=memory` → mémoire (sans persistance)
+  - `USE_MEMORY=true` > prioritaire sur `DB_CLIENT`
 
-- **Endpoints** : `GET /api/v1/tasks`, `POST /api/v1/tasks`, `DELETE /api/v1/tasks/:id`.
+- **Endpoints** : `GET /api/v1/tasks`, `POST /api/v1/tasks`, `DELETE /api/v1/tasks/:id` (pas d’endpoint de "completion").
 
 ---
 
-## ⚙️ Installation & Démarrage (sans Docker)
+## ⚙️ Installation & Démarrage (hors Docker)
 
 1. **Cloner** le projet
 
@@ -29,9 +31,7 @@ API **ToDoList** en **Node.js/Express**, architecture **MVC**, ESM (`"type": "mo
 
    ```sh
    cp .env.example .env
-   # .env
-   # PORT=3000
-   # MONGODB_URI=mongodb://localhost:27017/todolist
+   # Édite .env selon le backend voulu (voir ci-dessous)
    ```
 
 4. **Lancer**
@@ -59,12 +59,21 @@ Par défaut, l’API écoute sur **[http://localhost:3000](http://localhost:3000
 ├─ README.md
 ├─ .gitignore
 ├─ .env(.example)
+├─ docker-compose.yml
 └─ src/
    ├─ app.js                # point d'entrée Express
    ├─ models/
    │  └─ taskModel.js       # Modèle Mongoose (Task)
    ├─ controllers/
-   │  └─ taskController.js  # Logique métier (Mongo en dev/prod, mémoire en test)
+   │  └─ taskController.js  # Logique métier via repo (mongo/postgres/memory)
+   ├─ repos/
+   │  ├─ taskRepo.js        # Sélection du backend selon .env
+   │  ├─ mongoRepo.js       # Implémentation Mongo
+   │  ├─ postgresRepo.js    # Implémentation Postgres
+   │  └─ memoryRepo.js      # Implémentation mémoire
+   ├─ config/
+   │  ├─ db.js              # Connexion Mongo
+   │  └─ pg.js              # Connexion/Init Postgres
    ├─ routes/
    │  └─ taskRoutes.js      # Routes REST /api/v1/tasks
    └─ tests/
@@ -83,15 +92,16 @@ Base: `http://localhost:3000/api/v1/tasks`
 |    POST | `/`    | Ajouter une tâche             | `{ "title": "Acheter du lait", "description": "2L" }` |
 |  DELETE | `/:id` | Supprimer la tâche par **id** | —                                                     |
 
-> `:id` est un identifiant unique (UUID en mémoire, `_id` Mongo en DB).
+> `:id` est un identifiant unique (UUID en mémoire / `id` Postgres / `_id` Mongo).
 
 ---
 
 ## 🧪 Tests
 
-Le projet utilise le **runner natif** de Node (`node --test`) + **supertest**. Sous Windows, les variables d’env sont gérées avec **cross-env**.
+Runner natif **Node** (`node --test`) + **supertest**. Sous Windows, variables d’env via **cross-env**.
 
 ```jsonc
+// package.json (extrait)
 {
   "type": "module",
   "scripts": {
@@ -108,59 +118,76 @@ Lancer :
 npm test
 ```
 
-### Docker
+En test, le backend **mémoire** est utilisé automatiquement (rapide, sans DB).
 
-`docker-compose.yml` :
+---
 
-```yaml
-services:
-  api:
-    build: .
-    container_name: todolist-api
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      MONGODB_URI: mongodb://mongo:27017/todolist
-      USE_MEMORY: "false"
-    depends_on:
-      - mongo
+## 🐳 Docker avec **profils** (API + Mongo + Postgres)
 
-  mongo:
-    image: mongo:7
-    container_name: todolist-mongo
-    restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
-    # ports: ["27017:27017"] # optionnel
+Le `docker-compose.yml` permet de lancer l’API avec **Mongo** ou **Postgres** au choix via des **profils**.
 
-volumes:
-  mongo_data:
+### Variables `.env`
+
+```env
+# --- Choix du backend ---
+# mongo | postgres | memory
+DB_CLIENT=mongo
+USE_MEMORY=false
+
+# --- API ---
+PORT=3000
+NODE_ENV=production
+
+# --- Mongo ---
+MONGODB_URI=mongodb://mongo:27017/todolist
+
+# --- Postgres ---
+POSTGRES_URL=postgresql://app:app@postgres:5432/todolist
+POSTGRES_USER=app
+POSTGRES_PASSWORD=app
+POSTGRES_DB=todolist
 ```
 
-Lancer :
+### Lancer
 
-```sh
-docker compose up --build
-```
+- **API + Mongo**
 
-### Tester une fois Docker lancé
+  ```sh
+  docker compose --profile mongo up --build
+  ```
+
+- **API + Postgres**
+
+  ```sh
+  docker compose --profile postgres up --build
+  ```
+
+- **API en mémoire (aucune DB)**
+
+  ```sh
+  # Pas de profil DB + forcer mémoire
+  USE_MEMORY=true docker compose up --build
+  ```
+
+> L’API lit `DB_CLIENT` (`mongo`/`postgres`/`memory`) et utilise l’URI correspondant.
+> `USE_MEMORY=true` est prioritaire sur `DB_CLIENT`.
+
+### Tester une fois lancé
 
 ```sh
 # Healthcheck
-curl http://localhost:3000/health
+curl http://localhost:${PORT:-3000}/health
 
 # Lister
-curl http://localhost:3000/api/v1/tasks
+curl http://localhost:${PORT:-3000}/api/v1/tasks
 
 # Ajouter
-curl -X POST http://localhost:3000/api/v1/tasks \
+curl -X POST http://localhost:${PORT:-3000}/api/v1/tasks \
   -H "Content-Type: application/json" \
-  -d '{"title":"Réviser Express","description":"routes + tests"}'
+  -d '{"title":"Hello Docker","description":"mongo/postgres/memory"}'
 
-# Supprimer (remplacer <ID> par l'id retourné à la création)
-curl -X DELETE http://localhost:3000/api/v1/tasks/<ID>
+# Supprimer (remplacer <ID>)
+curl -X DELETE http://localhost:${PORT:-3000}/api/v1/tasks/<ID>
 ```
 
 ---
@@ -175,6 +202,7 @@ curl -X DELETE http://localhost:3000/api/v1/tasks/<ID>
 
 ## 📝 Notes
 
-- En **test**, le contrôleur utilise un **stockage en mémoire** (pas de connexion Mongo), ce qui rend la suite de tests rapide et indépendante.
-- En **dev/prod**, configure `MONGODB_URI` (local ou Docker) pour activer la persistance Mongo.
+- **Profils Docker** : `mongo` et `postgres` démarrent leurs services respectifs ; l’API démarre toujours.
+- **Postgres** : la table `tasks` et l’extension `uuid-ossp` sont créées automatiquement au démarrage.
+- **Mongo** : nécessite uniquement `MONGODB_URI` valide si `DB_CLIENT=mongo`.
 - Pas d’endpoint de **completion** dans ce projet.
