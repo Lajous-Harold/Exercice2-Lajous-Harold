@@ -1,11 +1,9 @@
 import { Task as MongoTask } from "../models/taskModel.js";
 
-// Fallback mémoire pour les tests (évite d'avoir une DB en mode test)
 const useMemory = process.env.NODE_ENV === "test" || process.env.USE_MEMORY === "true";
 const mem = { tasks: [] };
 
 function toPublic(t) {
-  // Normalise l'objet retourné (Mongo ou mémoire)
   return {
     id: t.id ?? t._id?.toString(),
     title: t.title,
