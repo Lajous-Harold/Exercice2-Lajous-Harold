@@ -3,23 +3,40 @@ services:
     build: .
     container_name: todolist-api
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
-      MONGODB_URI: mongodb://mongo:27017/todolist
-      USE_MEMORY: "false"
-    depends_on:
-      - mongo
+      DB_CLIENT: ${DB_CLIENT:-mongo}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/todolist}
+      POSTGRES_URL: ${POSTGRES_URL:-postgresql://app:app@postgres:5432/todolist}
+      USE_MEMORY: ${USE_MEMORY:-false}
+    restart: unless-stopped
 
   mongo:
     image: mongo:7
     container_name: todolist-mongo
+    profiles: ["mongo"]
     restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    image: postgres:16
+    container_name: todolist-postgres
+    profiles: ["postgres"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-todolist}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
 
 volumes:
   mongo_data:
+  pg_data:
