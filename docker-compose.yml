@@ -11,6 +11,11 @@ services:
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/todolist}
       POSTGRES_URL: ${POSTGRES_URL:-postgresql://app:app@postgres:5432/todolist}
       USE_MEMORY: ${USE_MEMORY:-false}
+      JWT_SECRET: ${JWT_SECRET}
+      TOKEN_TTL: ${TOKEN_TTL}
+      AUTH_USER: ${AUTH_USER}
+      AUTH_PASS_HASH: ${AUTH_PASS_HASH}
+
     restart: unless-stopped
 
   mongo:

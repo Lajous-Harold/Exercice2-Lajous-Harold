@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>ToDoList Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, Arial, sans-serif;
+        margin: 2rem;
+        max-width: 800px;
+      }
+      label {
+        display: block;
+        margin: 0.5rem 0 0.2rem;
+      }
+      input,
+      button,
+      textarea {
+        padding: 0.5rem;
+        font: inherit;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0.5rem 0;
+      }
+      pre {
+        background: #111;
+        color: #0f0;
+        padding: 1rem;
+        overflow: auto;
+        max-height: 300px;
+      }
+      .ok {
+        color: #0a0;
+      }
+      .err {
+        color: #a00;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ToDoList Demo</h1>
+
+    <section id="login">
+      <h2>Login</h2>
+      <div class="row">
+        <label>Username</label>
+        <input id="u" value="admin" />
+      </div>
+      <div class="row">
+        <label>Password</label>
+        <input id="p" type="password" placeholder="mot de passe" />
+      </div>
+      <button id="btnLogin">Se connecter</button>
+      <div id="loginMsg"></div>
+      <label>Token</label>
+      <textarea id="token" rows="4" readonly></textarea>
+    </section>
+
+    <section id="api" style="margin-top: 2rem">
+      <h2>Appels API protégés</h2>
+      <div class="row">
+        <button id="btnList">GET /api/v1/tasks</button>
+        <button id="btnCreate">POST /api/v1/tasks</button>
+      </div>
+      <div class="row">
+        <input id="title" placeholder="title" />
+        <input id="desc" placeholder="description" />
+      </div>
+      <div class="row">
+        <input id="delId" placeholder="id à supprimer" style="width: 300px" />
+        <button id="btnDelete">DELETE /api/v1/tasks/:id</button>
+      </div>
+      <h3>Réponse</h3>
+      <pre id="out"></pre>
+    </section>
+
+    <script>
+      const base = location.origin;
+      const $ = (sel) => document.querySelector(sel);
+      const out = $("#out");
+
+      const show = (obj) => (out.textContent = JSON.stringify(obj, null, 2));
+      const msg = (el, text, ok) => {
+        el.textContent = text;
+        el.className = ok ? "ok" : "err";
+      };
+
+      async function login() {
+        try {
+          const r = await fetch(`${base}/auth/login`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ username: $("#u").value, password: $("#p").value }),
+          });
+          const data = await r.json();
+          if (!r.ok) {
+            msg($("#loginMsg"), data.error || r.statusText, false);
+            return;
+          }
+          $("#token").value = data.token || "";
+          msg($("#loginMsg"), "OK", true);
+        } catch (e) {
+          msg($("#loginMsg"), e.message, false);
+        }
+      }
+
+      function authHeaders() {
+        const t = $("#token").value.trim();
+        return t ? { Authorization: `Bearer ${t}` } : {};
+      }
+
+      async function listTasks() {
+        const r = await fetch(`${base}/api/v1/tasks`, { headers: authHeaders() });
+        const data = await r.json().catch(() => ({ raw: "non-json" }));
+        show(data);
+      }
+
+      async function createTask() {
+        const body = {
+          title: $("#title").value || "via demo.html",
+          description: $("#desc").value || "",
+        };
+        const r = await fetch(`${base}/api/v1/tasks`, {
+          method: "POST",
+          headers: { "content-type": "application/json", ...authHeaders() },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json().catch(() => ({ raw: "non-json" }));
+        show(data);
+      }
+
+      async function deleteTask() {
+        const id = $("#delId").value.trim();
+        if (!id) return show({ error: "renseigne un id" });
+        const r = await fetch(`${base}/api/v1/tasks/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers: authHeaders(),
+        });
+        const data = await r.json().catch(() => ({ raw: "non-json" }));
+        show(data);
+      }
+
+      $("#btnLogin").onclick = login;
+      $("#btnList").onclick = listTasks;
+      $("#btnCreate").onclick = createTask;
+      $("#btnDelete").onclick = deleteTask;
+    </script>
+  </body>
+</html>
